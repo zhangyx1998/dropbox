@@ -17,3 +17,6 @@ export const DB_PATH = config.db_path ?? resolve(VAR_PATH, 'dropbox.json');
 if (!existsSync(DB_PATH)) writeFileSync(DB_PATH, JSON.stringify({}));
 export const TOKEN_PATH = config.token_path ?? resolve(VAR_PATH, 'token.json');
 if (!existsSync(TOKEN_PATH)) writeFileSync(TOKEN_PATH, JSON.stringify({}));
+// log path
+export const LOG_ERROR_PATH = config.error_log ?? resolve(VAR_PATH, 'error.log');
+export const LOG_COMB_PATH = config.error_log ?? resolve(VAR_PATH, 'combined.log');

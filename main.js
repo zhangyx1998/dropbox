@@ -1,6 +1,7 @@
 import express from 'express';
 import * as CONFIG from './config.js';
 import * as OP from './operations.js';
+import { logger } from './logger.js';
 
 const app = express();
 
@@ -12,12 +13,14 @@ app
 		if (id in data) {
 			if (!hasSearch) {
 				// Return content only
+				logger.info(`Read ${id} = ${data[id]}`);
 				res.send(data[id]);
 			} else {
 				// Return detailed info
 				// TODO
 			}
 		} else {
+			logger.warn(`Attempt to read unknown key "${id}" (${req.url})`);
 			res.status(404).send('404 Not Found\n');
 		}
 	})
@@ -25,13 +28,14 @@ app
 		express.text({ type() { return true } }),
 		(req, res) => {
 			const
-				{ url, id, hasSearch } = OP.processRequestUrl(req),
+				{ url, id: token, hasSearch } = OP.processRequestUrl(req),
 				tokenList = OP.getTokens(),
 				data = OP.getDB();
 			let flag_write_back = false;
-			for (const key in tokenList) {
-				if (tokenList[key] == id) {
-					data[key] = req.body.toString();
+			for (const id in tokenList) {
+				if (tokenList[id] == token) {
+					data[id] = req.body.toString();
+					logger.info(`Write ${id} = ${data[id]}`);
 					flag_write_back = true;
 				}
 			}
@@ -40,11 +44,10 @@ app
 		})
 	.use((err, req, res, next) => {
 		try {
-			console.error(err);
+			logger.error(err.message);
 			res.status(500).send("Internal Server Error\n");
 		} catch (e) { }
 	})
 
 app.listen(CONFIG.PORT);
-console.log(`Server up and running at port ${CONFIG.PORT}`);
-
+logger.info(`Server up and running at port ${CONFIG.PORT}`);
